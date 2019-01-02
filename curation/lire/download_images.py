@@ -1,28 +1,32 @@
 import urllib.request
-
 import csv
+import json
+import os
 
-file = open('infile.txt', 'w')  #書き込みモードでオープン
+file_o = open('infile.txt', 'w')  # 書き込みモードでオープン
 
-curation_uri = "https://mp.ex.nii.ac.jp/api/curation/json/9231722d-d609-452c-94b8-cde14eb2afef"
+path = "../../docs/curation/8fe0cd41f53022eca27fc4c04229dfa2.json"
 
+image_dir = "images"
 
+file_i = open(path, 'r')
+data = json.load(file_i)
 
-with open('../data/member.csv', 'r') as f:
-    reader = csv.reader(f)
+selection = data["selections"][0]
 
-    for row in reader:
-        url = row[1]
-        name = row[0]
+members = selection["members"]
 
-        path = "images/"+name+".jpg"
+hash = selection["within"]["label"]
 
-        file.write(path+"\n")
+for i in range(len(members)):
+  member = members[i]
+  url = member["thumbnail"].replace(",300/0/", ",600/0/")
+  path = image_dir + "/" + hash + "_" + str(i+1) + ".jpg"
 
-        '''
-        if not os.path.exists(path):
+  file_o.write(path + "\n")
 
-            urllib.request.urlretrieve(url.replace(",300", ",600"), path)
-        '''
+  if not os.path.exists(path):
+    urllib.request.urlretrieve(url, path)
 
-file.close()
+file_i.close()
+file_o.close()

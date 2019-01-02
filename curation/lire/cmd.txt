@@ -1,0 +1,1 @@
+java -classpath lire.jar:liresolr.jar:commons-codec-1.11.jar:commons-io-2.6.jar net.semanticmetadata.lire.solr.indexing/ParallelSolrIndexer -i infile.txt
