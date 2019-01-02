@@ -59,7 +59,7 @@
                 img-top>
             <p class="card-text">
               <b-button type="button" variant="primary" v-on:click="getAnswer(item.id);">Search</b-button>
-                 <b-button type="button" variant="primary" v-on:click="getAnswer(item.id);">View</b-button>
+                 <b-button type="button" variant="primary" v-on:click="goCuration(item.id);">View</b-button>
             </p>
         </b-card>
 
@@ -89,7 +89,7 @@ export default {
       message: '',
       imgurl: "",
       id: "",
-      number: 20,
+      number: 40,
       accuracy: 0.9,
       feature: "ph",
       features: [
@@ -110,7 +110,6 @@ export default {
           ms:"false",
           fl: "*",
           field: this.feature,
-          //id: "16-A00-6010-1-1",
           rows: this.number,
           accuracy: this.accuracy,
           candidates: "1000"
@@ -121,8 +120,6 @@ export default {
           if(this.id != ""){
             params.id = this.id
           }
-
-        this.message = params
 
         axios.get('http://104.154.80.89/solr/lire/lireq', {params})
           .then(function(response){
@@ -156,7 +153,16 @@ export default {
       /* Trick to reset/clear native browser form validation state */
       this.show = false;
       this.$nextTick(() => { this.show = true });
-    }
+    },
+    goCuration: function(id){
+        
+        var tmp = id.split("#")
+        var curation_uri = tmp[0]
+        var pos = tmp[1]
+        var url = "http://codh.rois.ac.jp/software/iiif-curation-viewer/demo/?curation="+curation_uri+"&pos="+pos
+        window.open(url,'icv');
+      
+      }
     }
 }
 </script>
