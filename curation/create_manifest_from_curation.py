@@ -1,113 +1,189 @@
-import json
 import urllib.request
+import json
+from hashlib import md5
 import csv
 
 
-def format_size(a):
-  a = int(a)
-  a = int(a * r)
-  return str(a)
+def create_anno(text, tags, canvas_id, area, color, manifest, anno_uri):
+  resource = dict()
+
+  resource["@context"] = "http://iiif.io/api/presentation/2/context.json"
+  resource["@type"] = "oa:Annotation"
+  resource["motivation"] = "oa:commenting"
+  resource["resource"] = []
+
+  r = dict()
+  resource["resource"].append(r)
+
+  r["@type"] = "dctypes:Text"
+  r["format"] = "text/html"
+  r["chars"] = text
+
+  for tag in tags:
+    r = dict()
+    resource["resource"].append(r)
+    r["@type"] = "oa:Tag"
+    r["chars"] = tag
+
+  on = dict()
+  resource["on"] = []
+  resource["on"].append(on)
+
+  on["@type"] = "oa:SpecificResource"
+
+  on["full"] = canvas_id
+  selector = dict()
+  selector["@type"] = "oa:Choice"
+
+  default = dict()
+  default["@type"] = "oa:FragmentSelector"
+
+  default["value"] = "xywh=" + area
+  selector["default"] = default
+
+  item = dict()
+  item["@type"] = "oa:SvgSelector"
+
+  xywh = area.split(",")
+  x = xywh[0]
+  y = xywh[1]
+  dx = xywh[2]
+  dy = xywh[3]
+
+  max_x = int(x) + int(dx)
+  max_y = int(y) + int(dy)
+
+  d = "M" + str(max_x) + "," + str(max_y) + "h-" + str(dx) + "v-" + str(dy) + "h" + str(dx) + "v" + str(
+    int(dy) / 2) + "z"
+
+  item["value"] = "<svg xmlns='http://www.w3.org/2000/svg'>" \
+                  "<path " \
+                  "xmlns=\"http://www.w3.org/2000/svg\" " \
+                  "d=\"" + d + "\" " \
+                               "data-paper-data=\"{&quot;strokeWidth&quot;:1,&quot;rotation&quot;:0,&quot;annotation&quot;:null,&quot;nonHoverStrokeColor&quot;:[&quot;Color&quot;,0,0.74902,1],&quot;editable&quot;:true,&quot;deleteIcon&quot;:null,&quot;rotationIcon&quot;:null,&quot;group&quot;:null}\" " \
+                               "id=\"rectangle_62389b77-19f2-4d12-aa7c-0ca7c788b5c3\" " \
+                               "fill-opacity=\"0.2\" " \
+                               "fill=\"" + color + "\" " \
+                                                   "fill-rule=\"nonzero\" " \
+                                                   "stroke=\"" + color + "\" " \
+                                                                         "stroke-width=\"121.89861\" " \
+                                                                         "stroke-linecap=\"butt\" " \
+                                                                         "stroke-linejoin=\"miter\" " \
+                                                                         "stroke-miterlimit=\"10\" " \
+                                                                         "stroke-dasharray=\"\" " \
+                                                                         "stroke-dashoffset=\"0\" " \
+                                                                         "font-family=\"none\" " \
+                                                                         "font-weight=\"none\" " \
+                                                                         "font-size=\"none\" " \
+                                                                         "text-anchor=\"none\" " \
+                                                                         "style=\"mix-blend-mode: normal\"/>" \
+                                                                         "</svg>"
+  selector["item"] = item
+
+  on["selector"] = selector
+
+  within = dict()
+  within["@id"] = manifest
+  within["@type"] = "sc:Manifest"
+
+  on["within"] = within
+
+  resource["@id"] = anno_uri
+
+  return resource
 
 
-def get_yolo_list(path):
-  with open(path, 'r') as f:
-    reader = csv.reader(f)
-    header = next(reader)  # ヘッダーを読み飛ばしたい時
+def read_curation(curation_json_path):
+  file = open(curation_json_path, 'r')
+  data = json.load(file)
 
-    for row in reader:
-      obj = dict()
-      obj["index"] = row[0]
-      obj["x"] = row[1]
-      obj["y"] = row[2]
-      obj["w"] = row[3]
-      obj["h"] = row[4]
-      obj["score"] = row[5]
-      yolo_list.append(obj)
+  selection = data["selections"][0]
+
+  members = selection["members"]
+
+  canvases = dict()
+
+  for i in range(len(members)):
+    member = members[i]
+
+    uri = member["@id"]
+    tmp = uri.split("#")
+    canvas_id = tmp[0]
+    area = tmp[1].split("=")[1]
+
+    label = member["label"]
+
+    if canvas_id not in canvases:
+      canvases[canvas_id] = []
+
+    arr = canvases[canvas_id]
+
+    obj = dict()
+    obj["label"] = label
+    obj["area"] = area
+    arr.append(obj)
+
+  file.close()
+
+  return canvases
 
 
-def get_canvases(manifest_uri):
+def create_annotation_list(canvas_id, index):
+  al = dict()
+  al["@id"] = oc["@id"]
+  al["@context"] = "http://www.shared-canvas.org/ns/context.json"
+  al["@type"] = "sc:AnnotationList"
+
+  resources = []
+  al["resources"] = resources
+
+  if canvas_id in curations:
+
+    anno_list = curations[canvas_id]
+
+    for anno in anno_list:
+      # def create_anno(text, tags, canvas_id, area, color, manifest, anno_uri):
+      resources.append(create_anno(anno["label"], [], canvas_id, anno["area"], "red", manifest_uri, oc["@id"]))
+
+  with open("../docs/annotation/anno_list/" + hash + "_" + index + ".json", 'w') as outfile:
+    json.dump(al, outfile, ensure_ascii=False, indent=4, sort_keys=True, separators=(',', ': '))
+
+
+fi = open("data/manifest_list.csv", 'r')
+
+reader = csv.reader(fi)
+header = next(reader)
+
+for row in reader:
+  manifest_uri = row[1]
+
   response = urllib.request.urlopen(manifest_uri)
   response_body = response.read().decode("utf-8")
   data = json.loads(response_body)
-  canvases_ = data["sequences"][0]["canvases"]
+  canvases = data["sequences"][0]["canvases"]
 
-  for canvas in canvases_:
-    obj = dict()
+  hash = md5(manifest_uri.encode('utf-8')).hexdigest()
+
+  new_uri = "https://nakamura196.github.io/lire/annotation/" + hash + ".json"
+  data["@id"] = new_uri
+
+  curations = read_curation("../docs/curation/" + hash + ".json")
+
+  for i in range(len(canvases)):
+    index = str(i + 1)
+
+    canvas = canvases[i]
+
     canvas_id = canvas["@id"]
-    height = canvas["images"][0]["resource"]["height"]
-    obj["canvas_id"] = canvas_id
-    obj["h"] = height
-    obj["image_api"] = canvas["images"][0]["resource"]["service"]["@id"]
-    canvases.append(obj)
 
+    otherContent = []
+    oc = dict()
+    otherContent.append(oc)
+    oc["@id"] = "https://nakamura196.github.io/lire/annotation/anno_list/" + hash + "_" + index + ".json"
+    oc["@type"] = "sc:AnnotationList"
+    canvas["otherContent"] = otherContent
 
-canvases = []
+    create_annotation_list(canvas_id, index)
 
-num = "2"
-hash = "8fe0cd41f53022eca27fc4c04229dfa2"
-manifest_uri = "https://www.dl.ndl.go.jp/api/iiif/2586693/manifest.json"
-
-get_canvases(manifest_uri)
-
-yolo_list = []
-
-path = "/Users/satoru/git/keras-yolo3/output/" + num + "_" + hash + "/list.csv"
-
-get_yolo_list(path)
-
-rate = 600
-
-with open('data/template.json') as f:
-  df = json.load(f)
-
-df["selections"] = []
-
-selection = {}
-df["selections"].append(selection)
-
-df["@id"] = "https://nakamura196.github.io/lire/curation/" + hash + ".json"
-selection["@id"] = df["@id"] + "/range" + str(1)
-
-selection["@type"] = "sc:Range"
-selection["label"] = "Manual curation by IIIF Curation Viewer"
-
-manifest = dict()
-selection["within"] = manifest
-manifest["@id"] = manifest_uri
-manifest["@type"] = "sc:Manifest"
-manifest["label"] = hash
-
-selection["members"] = []
-
-
-for i in range(len(yolo_list)):
-  obj = yolo_list[i]
-  index = int(obj["index"])
-
-  canvas = canvases[index]
-  canvas_id = canvas["canvas_id"]
-  h = canvas["h"]
-  r = h / rate
-
-  member = {}
-
-  selection["members"].append(member)
-
-  area = format_size(obj["x"]) + "," + format_size(obj["y"]) + "," + format_size(
-    obj["w"]) + "," + format_size(obj["h"])
-
-  member["@id"] = canvas_id + "#xywh=" + area
-  member["@type"] = "sc:Canvas"
-  member["label"] = "["+str(i+1)+"]"
-  member["thumbnail"] = canvas["image_api"]+"/"+area+"/,300/0/default.jpg"
-
-  metadata = []
-  member["metadata"] = metadata
-
-  m = {}
-  metadata.append(m)
-  m["label"] = "Score"
-  m["value"] = obj["score"]
-
-with open("../docs/curation/" + hash + ".json", 'w') as outfile:
-  json.dump(df, outfile, ensure_ascii=False, indent=4, sort_keys=True, separators=(',', ': '))
+  with open("../docs/annotation/"+hash+".json", 'w') as outfile:
+    json.dump(data, outfile, ensure_ascii=False, indent=4, sort_keys=True, separators=(',', ': '))

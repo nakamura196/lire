@@ -1,0 +1,4 @@
+logs/000/ep069-loss18.659-val_loss19.321.h5 filter=lfs diff=lfs merge=lfs -text
+model_data/trained_weights_final.h5 filter=lfs diff=lfs merge=lfs -text
+model_data/yolo.h5 filter=lfs diff=lfs merge=lfs -text
+model_data/yolo_weights.h5 filter=lfs diff=lfs merge=lfs -text

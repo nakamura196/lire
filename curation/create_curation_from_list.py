@@ -31,6 +31,8 @@ def get_canvases(manifest_uri):
   data = json.loads(response_body)
   canvases_ = data["sequences"][0]["canvases"]
 
+  label = data["label"]
+
   for canvas in canvases_:
     obj = dict()
     canvas_id = canvas["@id"]
@@ -40,8 +42,10 @@ def get_canvases(manifest_uri):
     obj["image_api"] = canvas["images"][0]["resource"]["service"]["@id"]
     canvases.append(obj)
 
+  return canvases, label
 
-fi = open("data/manifest_list2.csv", 'r')
+
+fi = open("data/manifest_list.csv", 'r')
 rate = 600
 
 reader = csv.reader(fi)
@@ -53,7 +57,7 @@ for row in reader:
 
     canvases = []
 
-    get_canvases(manifest_uri)
+    canvases, label = get_canvases(manifest_uri)
 
     yolo_list = []
 
@@ -81,7 +85,7 @@ for row in reader:
     selection["within"] = manifest
     manifest["@id"] = manifest_uri
     manifest["@type"] = "sc:Manifest"
-    manifest["label"] = hash
+    manifest["label"] = label
 
     selection["members"] = []
 
