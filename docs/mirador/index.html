@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Mirador</title>
+
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <link rel="stylesheet" type="text/css" href="build/mirador/css/mirador-combined.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <style type="text/css">
+  #viewer {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+  }
+  </style>
+
+</head>
+<body>
+
+  <div id="viewer"></div>
+
+  <script
+  src="//code.jquery.com/jquery-3.3.1.min.js"
+  integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+  crossorigin="anonymous"></script>
+
+  <script src="build/mirador/mirador.min.js"></script>
+
+  <script type="text/javascript" language="javascript">
+    $(function() {
+
+        var vars = {};
+        var param = location.search.substring(1).split('&');
+        for(var i = 0; i < param.length; i++) {
+          var keySearch = param[i].search(/=/);
+          var key = '';
+          if(keySearch != -1) key = param[i].slice(0, keySearch);
+          var val = param[i].slice(param[i].indexOf('=', 0) + 1);
+          if(key != '') vars[key] = decodeURI(val);
+        }
+
+
+        var tmpManifests = new Object();
+
+        if(vars["collection"]){
+          $.getJSON(vars["collection"], function(json){
+            manifests = json["manifests"]
+
+            for(var i = 0; i < manifests.length; i++) {
+              manifest = manifests[i]
+              tmpManifests[manifest["id"]] = manifest["label"];
+            }
+
+
+          });
+
+
+        } else {
+          tmpManifests['https://dzkimgs.l.u-tokyo.ac.jp/iiif/zuzoubu/12b02/manifest.json'] = '東京大学大学院人文社会系研究科・人文情報学拠点 SAT大正蔵図像DB';
+          tmpManifests['https://lab.ndl.go.jp/dhii/iiif/2541003/manifest.json'] = '国立国会図書館 百鬼夜行絵巻';
+          tmpManifests['https://media.nga.gov/public/manifests/nga_highlights.json'] = 'National Gallery of Art Collection Highlights';
+        }
+
+
+        var windowObjects = new Array();
+        var layout;
+
+        var data = new Array();
+
+        if(vars["manifest"]){
+          var manifests = vars["manifest"];
+          var array = manifests.split(";");
+
+          for(var i = 0; i < array.length; i++){
+            var manifest = array[i];
+            var obj = new Object();
+            obj["loadedManifest"] = manifest;
+            obj["viewType"] = "ImageView";
+            windowObjects.push(obj);
+            tmpManifests[manifest] = "";
+          }
+
+          layout = "1x"+array.length;
+
+        } else {
+
+          for(var key in tmpManifests){
+
+            var manifest = key;
+
+            var obj = new Object();
+            obj["loadedManifest"] = manifest;
+            obj["viewType"] = "ImageView";
+            windowObjects.push(obj);
+
+
+          }
+
+          layout ="2x2";
+
+
+        }
+
+        for(var key in tmpManifests){
+
+          var manifest = key;
+
+          var obj = new Object();
+          obj["manifestUri"] = manifest;
+          obj["location"] = tmpManifests[key];
+          data.push(obj);
+
+
+        }
+
+        var windowSettings = new Object()
+        if(vars["annotationState"] == "on"){
+          windowSettings["canvasControls"] = {
+            "annotations": {
+              "annotationState": "on",
+              "annotationCreation": true
+            }
+          }
+        }
+
+        var sidePanelOptions = {}
+        if(vars["sidePanelOptions"] == "on"){
+          sidePanelOptions = {
+            "tocTabAvailable": true,
+            "layersTabAvailable": true,
+            "searchTabAvailable": true
+          }
+        }
+
+
+        Mirador({
+          "id": "viewer",
+          "layout": layout,
+          "data": data,
+          buildPath: "mirador/",
+          "windowObjects": windowObjects,
+          "windowSettings": windowSettings,
+          "annotationEndpoint": { "name":"Local Storage", "module": "LocalStorageEndpoint" },
+          "sidePanelOptions" : sidePanelOptions
+        });
+      });
+
+      </script>
+</body>
+</html>
