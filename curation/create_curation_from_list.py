@@ -45,7 +45,7 @@ def get_canvases(manifest_uri):
   return canvases, label
 
 
-fi = open("data/manifest_list.csv", 'r')
+fi = open("data/manifest_list2.csv", 'r')
 rate = 600
 
 reader = csv.reader(fi)
@@ -53,6 +53,8 @@ header = next(reader)
 for row in reader:
     num = row[0]
     manifest_uri = row[1]
+    print(manifest_uri)
+
     hash = md5(manifest_uri.encode('utf-8')).hexdigest()
 
     canvases = []

@@ -6,7 +6,7 @@ from hashlib import md5
 
 file_o = open('infile.txt', 'w')  # 書き込みモードでオープン
 
-fi = open("../data/manifest_list.csv", 'r')
+fi = open("../data/manifest_list2.csv", 'r')
 
 image_dir = "images"
 
@@ -14,6 +14,8 @@ reader = csv.reader(fi)
 header = next(reader)
 for row in reader:
     manifest_uri = row[1]
+    print(manifest_uri)
+
     hash = md5(manifest_uri.encode('utf-8')).hexdigest()
 
     path = "../../docs/curation/"+hash+".json"
@@ -24,8 +26,6 @@ for row in reader:
     selection = data["selections"][0]
 
     members = selection["members"]
-
-    hash = selection["within"]["label"]
 
     for i in range(len(members)):
       member = members[i]

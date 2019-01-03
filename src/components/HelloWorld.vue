@@ -3,15 +3,28 @@
 
   <b-form @submit="onSubmit" @reset="onReset">
 
-<b-form-group id="exampleInputGroup2"
-                    label="Image URL:"
-                    label-for="exampleInput2">
-        <b-form-input id="exampleInput2"
-                      type="text"
+    <b-row class="mb-4">
+        <b-col sm="10">
+          <b-form-group id="fieldsetHorizontal"
+                horizontal
+                :label-cols="2"
+                breakpoint="md"
+                label="Image URL:"
+                label-for="inputHorizontal">
+    <b-form-input id="inputHorizontal"
+    type="text"
                       v-model="imgurl"
                       placeholder="http://...">
-        </b-form-input>
-      </b-form-group>
+    </b-form-input>
+    </b-form-group>
+
+          </b-col>
+        <b-col sm="2">
+          <b-button type="button" variant="primary" v-on:click="getAnswer();">Search</b-button>
+          </b-col>
+          </b-row>
+
+
 
     <b-row>
         <b-col sm="4">
@@ -48,19 +61,21 @@
         </b-col>
     </b-row>
 
-      <b-button type="button" variant="primary" v-on:click="getAnswer();">Search</b-button>
+      
     </b-form>
 
   <b-row class="my-5">
     <b-col sm="3" v-for="item in items" class="mb-4">
 
-      <b-card v-bind:img-src="item.imgurl"
-                img-alt="image"
-                img-top>
-            <p class="card-text">
+        <b-card>
+        <b-card-body>
+            <b-img thumbnail fluid v-bind:src="item.imgurl" alt="Thumbnail" />
+        
+            <p class="card-text mt-4">
               <b-button type="button" variant="primary" v-on:click="getAnswer(item.id);">Search</b-button>
                  <b-button type="button" variant="primary" v-on:click="goCuration(item.id);">View</b-button>
             </p>
+        </b-card-body>
         </b-card>
 
       </b-col>
@@ -136,6 +151,7 @@ export default {
           })
           .finally(function(){
             //vm.message = '';
+            window.scrollTo(0,50);
           })
 
       },
