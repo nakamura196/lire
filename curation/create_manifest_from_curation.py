@@ -149,13 +149,14 @@ def create_annotation_list(canvas_id, index):
     json.dump(al, outfile, ensure_ascii=False, indent=4, sort_keys=True, separators=(',', ': '))
 
 
-fi = open("data/manifest_list.csv", 'r')
+fi = open("data/manifest_list2.csv", 'r')
 
 reader = csv.reader(fi)
 header = next(reader)
 
 for row in reader:
   manifest_uri = row[1]
+  print(manifest_uri)
 
   response = urllib.request.urlopen(manifest_uri)
   response_body = response.read().decode("utf-8")

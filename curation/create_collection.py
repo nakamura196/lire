@@ -4,9 +4,9 @@ import csv
 from hashlib import md5
 
 
-fi = open("data/manifest_list.csv", 'r')
+fi = open("data/manifest_list2.csv", 'r')
 
-filename = "ndl"
+filename = "kunshujo"
 
 manifests = []
 
