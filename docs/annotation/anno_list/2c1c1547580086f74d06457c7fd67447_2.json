@@ -1,5 +1,5 @@
 {
-    "@context": "http://www.shared-canvas.org/ns/context.json",
+    "@context": "http://iiif.io/api/presentation/2/context.json",
     "@id": "https://nakamura196.github.io/lire/annotation/anno_list/2c1c1547580086f74d06457c7fd67447_2.json",
     "@type": "sc:AnnotationList",
     "resources": [
