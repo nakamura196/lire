@@ -24,7 +24,7 @@
                         }
                     },
                     "within": {
-                        "@id": "https://iiif.dl.itc.u-tokyo.ac.jp/repo/iiif/25217/manifest",
+                        "@id": "https://iiif.dl.itc.u-tokyo.ac.jp/repo/iiif/39efadf4-2c5e-45e9-ac71-4fad6289c031/manifest",
                         "@type": "sc:Manifest"
                     }
                 }
@@ -58,7 +58,7 @@
                         }
                     },
                     "within": {
-                        "@id": "https://iiif.dl.itc.u-tokyo.ac.jp/repo/iiif/25217/manifest",
+                        "@id": "https://iiif.dl.itc.u-tokyo.ac.jp/repo/iiif/39efadf4-2c5e-45e9-ac71-4fad6289c031/manifest",
                         "@type": "sc:Manifest"
                     }
                 }
